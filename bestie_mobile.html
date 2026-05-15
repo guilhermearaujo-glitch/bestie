@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bestie">
+<meta name="theme-color" content="#0d1b2a">
+<title>Bestie 💪</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0ed; color: #1a1a1a; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #0d1b2a, #1b3a5c);
+  color: white; padding: 52px 18px 16px;
+  position: sticky; top: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: flex-end;
+}
+.header h1 { font-size: 22px; font-weight: 900; }
+.header p  { font-size: 11px; opacity: 0.5; margin-top: 2px; }
+.hright { text-align: right; }
+.date-lbl { font-size: 13px; font-weight: 700; }
+.day-lbl  { font-size: 10px; opacity: 0.45; margin-top: 2px; }
+
+/* INSTALL TIP */
+.install-tip {
+  background: #1b3a5c; color: white; text-align: center;
+  padding: 10px 16px; font-size: 12px; font-weight: 600; display: none;
+}
+
+/* PROGRESSO */
+.prog-bar-wrap {
+  background: #0d1b2a; padding: 10px 18px 14px;
+  position: sticky; top: 90px; z-index: 99;
+}
+.prog-info { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+.prog-track { height: 5px; background: rgba(255,255,255,0.12); border-radius: 10px; }
+.prog-fill  { height: 100%; background: #4dd88a; border-radius: 10px; transition: width 0.4s ease; }
+
+/* ALERTAS */
+.alertas { padding: 0 14px 2px; margin-top: 10px; }
+.alerta {
+  padding: 10px 14px; font-size: 13px; font-weight: 600;
+  border-radius: 12px; margin-bottom: 6px; display: none;
+}
+.alerta-mou  { background: #fff4e0; color: #7a4800; }
+.alerta-nev  { background: #e8f0fe; color: #1b3a5c; }
+.alerta-vitd { background: #fffde6; color: #6b5900; }
+
+/* LISTA PRINCIPAL */
+.main { padding: 12px 14px 100px; }
+
+.section-lbl {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.6px; color: #bbb; margin: 16px 0 8px 2px;
+}
+.section-lbl:first-child { margin-top: 4px; }
+
+/* ITEM DA LISTA */
+.item {
+  background: white; border-radius: 16px; padding: 16px 18px;
+  margin-bottom: 9px; border: 1.5px solid #e8e8e8;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer; touch-action: manipulation;
+  transition: all 0.18s;
+}
+.item:active { transform: scale(0.98); }
+.item.done {
+  background: #f7fdf9; border-color: #b6e8c8;
+  opacity: 0.65; pointer-events: none;
+}
+.item-em { font-size: 28px; flex-shrink: 0; }
+.item-body { flex: 1; }
+.item-name { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+.item-sub  { font-size: 12px; color: #bbb; margin-top: 2px; }
+.item.done .item-name { color: #2e9e5b; text-decoration: line-through; }
+.item-arrow { font-size: 18px; color: #ccc; flex-shrink: 0; }
+.item.done .item-arrow { color: #4dd88a; }
+.done-badge {
+  background: #4dd88a; color: white; border-radius: 20px;
+  padding: 3px 10px; font-size: 11px; font-weight: 800;
+}
+
+/* VAZIO */
+.all-done {
+  text-align: center; padding: 48px 24px;
+  display: none;
+}
+.all-done .big-em { font-size: 64px; margin-bottom: 12px; }
+.all-done h2 { font-size: 22px; font-weight: 900; color: #1b3a5c; }
+.all-done p  { font-size: 14px; color: #aaa; margin-top: 6px; }
+
+/* BOTÃO ENVIAR */
+.btn-enviar-wrap {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 12px 16px 28px; background: white;
+  border-top: 1px solid #eee; display: none;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+.btn-enviar-wrap.visible { display: block; }
+.btn-whats {
+  width: 100%; background: #25d366; color: white;
+  border: none; border-radius: 14px; padding: 16px;
+  font-size: 16px; font-weight: 800; cursor: pointer;
+  touch-action: manipulation;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* ====== MODAL ====== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 200; display: none; align-items: flex-end;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 24px 24px 0 0;
+  width: 100%; max-height: 88vh; overflow-y: auto;
+  padding: 0 0 40px;
+  animation: slideUp 0.28s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-handle {
+  width: 36px; height: 4px; background: #e0e0e0; border-radius: 4px;
+  margin: 12px auto 0;
+}
+.modal-hd {
+  padding: 16px 20px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+}
+.modal-title { font-size: 17px; font-weight: 800; color: #1b3a5c; }
+.modal-close {
+  background: #f0f0f0; border: none; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.modal-body { padding: 16px 20px; }
+
+/* dentro do modal */
+.m-sec { margin-bottom: 18px; }
+.m-lbl {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #ccc; margin-bottom: 8px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  padding: 9px 14px; border-radius: 22px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1.5px solid #e0e0e0; background: #f7f7f7;
+  color: #555; transition: all 0.12s; user-select: none;
+  white-space: nowrap; touch-action: manipulation;
+}
+.chip.sel-prot { background: #e8f5ee; border-color: #6dbb8e; color: #1a6635; font-weight: 700; }
+.chip.sel-carb { background: #e8f0fe; border-color: #6d9fe8; color: #1a3a7a; font-weight: 700; }
+.chip.sel-frut { background: #fff3e0; border-color: #f5a623; color: #7a4200; font-weight: 700; }
+.chip.sel-extr { background: #f3e8ff; border-color: #b07de8; color: #4a1a7a; font-weight: 700; }
+.chip.sel-tren { background: #1b3a5c; border-color: #1b3a5c; color: white; font-weight: 700; }
+
+/* time */
+.time-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.time-lbl { font-size: 12px; color: #aaa; font-weight: 600; }
+.time-inp {
+  border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 8px 12px;
+  font-size: 15px; font-family: inherit; color: #333; background: #fafafa; width: 100px;
+}
+.time-inp:focus { outline: none; border-color: #1b3a5c; background: white; }
+
+/* toggle plano/fora */
+.plano-toggle {
+  display: flex; border-radius: 10px; overflow: hidden;
+  border: 1.5px solid #e0e0e0; margin-bottom: 14px;
+}
+.pt-btn {
+  flex: 1; padding: 10px 6px; font-size: 12px; font-weight: 700;
+  border: none; cursor: pointer; background: #f7f7f7; color: #aaa;
+  text-align: center; touch-action: manipulation; transition: all 0.15s;
+}
+.pt-btn.ativo-ok   { background: #eaf7ef; color: #1a7a40; }
+.pt-btn.ativo-fora { background: #fff0e0; color: #c0500a; }
+.fora-bloco { display: none; }
+.fora-bloco.vis { display: block; }
+.fora-inp {
+  width: 100%; border: 1.5px solid #f5c6a0; border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; font-family: inherit;
+  color: #1a1a1a; background: #fff8f2; resize: none; min-height: 72px;
+}
+.fora-inp:focus { outline: none; border-color: #e06a20; }
+.fora-inp::placeholder { color: #dbb; font-size: 13px; }
+
+/* textarea obs */
+.obs-inp {
+  width: 100%; border: 1.5px solid #e8e8e8; border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; font-family: inherit;
+  color: #1a1a1a; background: #f9f9f9; resize: none; min-height: 58px;
+}
+.obs-inp:focus { outline: none; border-color: #1b3a5c; background: white; }
+.obs-inp::placeholder { color: #ccc; font-size: 13px; }
+
+/* humor no modal */
+.hum-row { display: flex; gap: 6px; }
+.hum-btn {
+  flex: 1; padding: 11px 4px; border: 1.5px solid #eee;
+  border-radius: 12px; background: #f8f8f8; cursor: pointer;
+  text-align: center; font-size: 22px; transition: all 0.12s;
+  touch-action: manipulation;
+}
+.hum-btn.sel { border-color: #1b3a5c; background: #e8f0fe; }
+.hum-lbl { font-size: 8px; font-weight: 700; color: #aaa; display: block; margin-top: 3px; text-transform: uppercase; }
+
+/* check simples no modal */
+.chk-simple {
+  display: flex; align-items: center; gap: 12px;
+  background: #f8f8f8; border: 1.5px solid #ebebeb;
+  border-radius: 12px; padding: 13px 14px; cursor: pointer;
+  touch-action: manipulation; transition: all 0.12s; min-height: 54px;
+}
+.chk-simple.on { background: #eaf7ef; border-color: #7dd4a0; }
+.chk-box {
+  width: 24px; height: 24px; border: 2px solid #d0d0d0; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; color: transparent; transition: all 0.12s;
+}
+.chk-simple.on .chk-box { background: #27ae60; border-color: #27ae60; color: white; }
+.chk-name { font-size: 14px; font-weight: 700; color: #444; }
+.chk-sub  { font-size: 11px; color: #bbb; margin-top: 2px; }
+
+/* BOTÃO CONFIRMAR */
+.btn-confirmar {
+  width: 100%; background: linear-gradient(135deg, #1b3a5c, #1b4f72);
+  color: white; border: none; border-radius: 14px; padding: 17px;
+  font-size: 16px; font-weight: 800; cursor: pointer;
+  touch-action: manipulation; margin-top: 8px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 110px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: #1a1a1a; color: white; padding: 11px 20px;
+  border-radius: 12px; font-size: 14px; font-weight: 700;
+  z-index: 9999; transition: transform 0.3s ease; white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* TIMER */
+.timer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 500; display: none; align-items: center; justify-content: center;
+  flex-direction: column; backdrop-filter: blur(4px);
+}
+.timer-overlay.open { display: flex; }
+.timer-circle {
+  width: 200px; height: 200px; border-radius: 50%;
+  background: #1b3a5c; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  box-shadow: 0 0 0 8px rgba(77,216,138,0.2);
+  position: relative;
+}
+.timer-circle svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+.timer-num { font-size: 52px; font-weight: 900; color: white; line-height: 1; }
+.timer-lbl { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.timer-msg { font-size: 16px; font-weight: 700; color: white; margin-top: 24px; }
+.timer-skip { margin-top: 16px; background: rgba(255,255,255,0.12); color: white; border: none; border-radius: 20px; padding: 10px 24px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.hist-pill { display: inline-block; background: #e8f0fe; color: #1b3a5c; border-radius: 6px; padding: 2px 8px; font-size: 10px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- INSTALL TIP -->
+<div class="install-tip" id="install-tip">
+  📲 Adicione à tela inicial: toque em <b>Compartilhar</b> → <b>Adicionar à Tela de Início</b>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>💪 Bestie</h1>
+    <p>Saúde · Alimentação · Bem-estar</p>
+  </div>
+  <div class="hright">
+    <div class="date-lbl" id="today-lbl">—</div>
+    <div class="day-lbl"  id="day-lbl">—</div>
+  </div>
+</div>
+
+<!-- BARRA DE PROGRESSO -->
+<div class="prog-bar-wrap">
+  <div class="prog-info">
+    <span id="prog-txt">0 de 0 itens registrados</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- ALERTAS -->
+<div class="alertas">
+  <div class="alerta alerta-mou" id="al-mou">💉 Hoje é dia do Mounjaro! Não esquece.</div>
+  <div class="alerta alerta-nev" id="al-nev">💉 Hoje é dia do Nevrix IM! Não esquece.</div>
+  <div class="alerta alerta-vitd" id="al-vitd">☀️ Hoje é dia do Sany D! Toma com a refeição.</div>
+</div>
+
+<!-- LISTA PRINCIPAL -->
+<div class="main" id="main-list">
+
+  <div class="section-lbl">🍽️ Refeições</div>
+
+  <div class="item" id="item-cafe" onclick="abrirModal('cafe')">
+    <div class="item-em">☀️</div>
+    <div class="item-body">
+      <div class="item-name">Café da manhã</div>
+      <div class="item-sub">Toque para registrar</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="item" id="item-almoco" onclick="abrirModal('almoco')">
+    <div class="item-em">🍽️</div>
+    <div class="item-body">
+      <div class="item-name">Almoço</div>
+      <div class="item-sub">Toque para registrar</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="item" id="item-jantar" onclick="abrirModal('jantar')">
+    <div class="item-em">🌙</div>
+    <div class="item-body">
+      <div class="item-name">Jantar / Pós-treino</div>
+      <div class="item-sub">Toque para registrar</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="section-lbl" id="sec-rem">💊 Remédios</div>
+
+  <div class="item" id="item-vitc" onclick="abrirModal('vitc')">
+    <div class="item-em">🍊</div>
+    <div class="item-body">
+      <div class="item-name">Vitamina C</div>
+      <div class="item-sub">1 efervescente</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="item" id="item-omega" onclick="abrirModal('omega')">
+    <div class="item-em">🐟</div>
+    <div class="item-body">
+      <div class="item-name">Ômega 3</div>
+      <div class="item-sub">1 cápsula após o almoço</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="item" id="item-nevrix" onclick="abrirModal('nevrix')" style="display:none">
+    <div class="item-em">💉</div>
+    <div class="item-body">
+      <div class="item-name">Nevrix IM — B12+B6+B1</div>
+      <div class="item-sub">1 ampola IM profunda</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="item" id="item-vitd" onclick="abrirModal('vitd')" style="display:none">
+    <div class="item-em">☀️</div>
+    <div class="item-body">
+      <div class="item-name">Sany D 50.000UI</div>
+      <div class="item-sub">1 cápsula com refeição</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="item" id="item-mou" onclick="abrirModal('mou')" style="display:none">
+    <div class="item-em">💉</div>
+    <div class="item-body">
+      <div class="item-name">Mounjaro 5.0mg</div>
+      <div class="item-sub">Subcutâneo</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="section-lbl">🏋️ Treino</div>
+
+  <div class="item" id="item-treino" onclick="abrirModal('treino')">
+    <div class="item-em">🏋️</div>
+    <div class="item-body">
+      <div class="item-name">Treino de hoje</div>
+      <div class="item-sub">Toque para registrar</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+  <div class="section-lbl">😊 Bem-estar</div>
+
+  <div class="item" id="item-humor" onclick="abrirModal('humor')">
+    <div class="item-em">😊</div>
+    <div class="item-body">
+      <div class="item-name">Como você está?</div>
+      <div class="item-sub">Humor e energia do dia</div>
+    </div>
+    <div class="item-arrow">›</div>
+  </div>
+
+</div>
+
+<!-- TELA DE DIA COMPLETO -->
+<div class="all-done" id="all-done">
+  <div class="big-em">🎉</div>
+  <h2>Dia completo!</h2>
+  <p>Você registrou tudo. Manda pro Bestie!</p>
+</div>
+
+<!-- BOTÃO ENVIAR -->
+<div class="btn-enviar-wrap" id="btn-enviar-wrap">
+  <button class="btn-whats" onclick="abrirWhatsApp()">
+    <span style="font-size:20px">💬</span> Enviar resumo pro Bestie
+  </button>
+</div>
+
+<!-- ====== TIMER DE DESCANSO ====== -->
+<div class="timer-overlay" id="timer-overlay">
+  <div class="timer-circle">
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+      <circle id="timer-arc" cx="100" cy="100" r="90" fill="none" stroke="#4dd88a" stroke-width="8"
+        stroke-linecap="round" stroke-dasharray="565" stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-num" id="timer-num">1:30</div>
+    <div class="timer-lbl" id="timer-lbl">Descanse</div>
+  </div>
+  <div class="timer-msg" id="timer-msg">Próxima série em breve…</div>
+  <button class="timer-skip" onclick="pularTimer()">Pular descanso →</button>
+</div>
+
+<!-- ====== MODAL ====== -->
+<div class="modal-overlay" id="modal-overlay" onclick="fecharModalOverlay(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">—</div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATAS ───────────────────────────────────────────────────────────────────
+const hoje  = new Date();
+const DIAS  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+document.getElementById('today-lbl').textContent =
+  `${DIAS[hoje.getDay()]}, ${hoje.getDate()} ${MESES[hoje.getMonth()]}`;
+const inicio = new Date('2026-05-19');
+const diffD  = Math.floor((hoje - inicio) / 864e5);
+document.getElementById('day-lbl').textContent =
+  diffD >= 0 ? `Dia ${diffD+1} do plano` : `Começa em ${Math.abs(diffD)} dias`;
+
+// iOS install tip
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS && !window.navigator.standalone) document.getElementById('install-tip').style.display = 'block';
+
+// ── REMÉDIOS ESPECIAIS ───────────────────────────────────────────────────────
+function isSameDay(a,b) { return a.toISOString().slice(0,10)===b.toISOString().slice(0,10); }
+function fmtDia(d) { return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; }
+function diffDias(d) { return Math.ceil((d-hoje)/864e5); }
+
+const nevrixDatas = Array.from({length:20},(_,i)=>{ const d=new Date('2026-05-20'); d.setDate(d.getDate()+i*7); return d; });
+const vitdDatas   = ['2026-05-21','2026-05-28','2026-06-04','2026-06-11'].map(d=>new Date(d));
+const mouDatas    = ['2026-05-19','2026-06-02','2026-06-17','2026-07-01','2026-07-16'].map(d=>new Date(d));
+
+const ehNevrix = nevrixDatas.some(d=>isSameDay(d,hoje));
+const ehVitD   = vitdDatas.some(d=>isSameDay(d,hoje));
+const ehMou    = mouDatas.some(d=>isSameDay(d,hoje));
+
+if (ehNevrix) { document.getElementById('item-nevrix').style.display='flex'; document.getElementById('al-nev').style.display='block'; }
+if (ehVitD)   { document.getElementById('item-vitd').style.display='flex';   document.getElementById('al-vitd').style.display='block'; }
+if (ehMou)    { document.getElementById('item-mou').style.display='flex';    document.getElementById('al-mou').style.display='block'; }
+
+// ── ESTADO DO DIA ─────────────────────────────────────────────────────────────
+const registros = {};
+
+function totalItens() {
+  return document.querySelectorAll('#main-list .item:not([style*="display:none"])').length;
+}
+function totalFeitos() {
+  return document.querySelectorAll('#main-list .item.done').length;
+}
+function atualizarProgresso() {
+  const total = totalItens();
+  const feitos = totalFeitos();
+  const pct = total ? Math.round(feitos/total*100) : 0;
+  document.getElementById('prog-txt').textContent = `${feitos} de ${total} itens registrados`;
+  document.getElementById('prog-pct').textContent = `${pct}%`;
+  document.getElementById('prog-fill').style.width = pct + '%';
+
+  const btnWrap = document.getElementById('btn-enviar-wrap');
+  const allDone = document.getElementById('all-done');
+  const mainList = document.getElementById('main-list');
+
+  if (feitos > 0) btnWrap.classList.add('visible');
+
+  if (feitos === total && total > 0) {
+    mainList.style.display = 'none';
+    allDone.style.display = 'block';
+  } else {
+    mainList.style.display = 'block';
+    allDone.style.display = 'none';
+  }
+}
+
+function marcarFeito(id, resumo) {
+  registros[id] = resumo;
+  const el = document.getElementById('item-' + id);
+  if (!el) return;
+  el.classList.add('done');
+  el.querySelector('.item-sub').textContent = resumo || '✅ Registrado';
+  el.querySelector('.item-arrow').innerHTML = '<span class="done-badge">✅</span>';
+  atualizarProgresso();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+let modalAtual = null;
+let humorSel = '';
+
+function abrirModal(tipo) {
+  modalAtual = tipo;
+  humorSel = '';
+  const overlay = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = tituloModal(tipo);
+  document.getElementById('modal-body').innerHTML = conteudoModal(tipo);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  modalAtual = null;
+}
+
+function fecharModalOverlay(e) {
+  if (e.target === document.getElementById('modal-overlay')) fecharModal();
+}
+
+function tituloModal(tipo) {
+  const mapa = {
+    cafe:   '☀️ Café da manhã',
+    almoco: '🍽️ Almoço',
+    jantar: '🌙 Jantar / Pós-treino',
+    vitc:   '🍊 Vitamina C',
+    omega:  '🐟 Ômega 3',
+    nevrix: '💉 Nevrix IM',
+    vitd:   '☀️ Sany D 50.000UI',
+    mou:    '💉 Mounjaro 5.0mg',
+    treino: '🏋️ Treino de hoje',
+    humor:  '😊 Como você está?',
+  };
+  return mapa[tipo] || tipo;
+}
+
+function conteudoModal(tipo) {
+  if (tipo === 'cafe') return modalRefeicao('cafe', [
+    { grp:'c1p', lbl:'Proteína', cls:'sel-prot', multi:false, opts:['4 fat. mussarela + 2 ovos','2 fat. mussarela + 1 ovo','15g whey'] },
+    { grp:'c1c', lbl:'Carboidrato', cls:'sel-carb', multi:false, opts:['50g pão de queijo','1 waffle','1 pão francês','2 bisnagas','40g tapioca','1 egg sponge','35g farinha láctea','1 Rap10'] },
+    { grp:'c1f', lbl:'Fruta', cls:'sel-frut', multi:false, opts:['100g banana','190g uva','200g melão','240g morango','180g kiwi'] },
+  ]);
+
+  if (tipo === 'almoco') return modalRefeicao('almoco', [
+    { grp:'c2p', lbl:'Proteína ⭐ carne vermelha', cls:'sel-prot', multi:false, opts:['150g hambúrguer','150g carne vermelha','150g frango','150g tilápia'] },
+    { grp:'c2c', lbl:'Carboidrato', cls:'sel-carb', multi:false, opts:['2 pão hambúrguer','2 pão francês','2 Rap10','200g macarrão'] },
+    { grp:'c2e', lbl:'Extras (vários)', cls:'sel-extr', multi:true, opts:['30g queijo','2 fat. mussarela','25g chocolate','Nutella'] },
+  ]);
+
+  if (tipo === 'jantar') return modalRefeicao('jantar', [
+    { grp:'c3t', lbl:'Pós-treino imediato', cls:'sel-prot', multi:true, opts:['60g whey','9g creatina'] },
+    { grp:'c3p', lbl:'Proteína ⭐ carne branca', cls:'sel-prot', multi:false, opts:['150g hambúrguer','150g carne','150g frango','150g tilápia'] },
+    { grp:'c3c', lbl:'Carboidrato', cls:'sel-carb', multi:false, opts:['1 pão hambúrguer','1 pão francês','1 Rap10','100g macarrão'] },
+    { grp:'c3e', lbl:'Extras (vários)', cls:'sel-extr', multi:true, opts:['30g queijo','2 fat. mussarela','25g chocolate','Nutella'] },
+  ]);
+
+  if (tipo === 'vitc')   return modalCheck('Vitamina C tomada?', '1 efervescente hoje');
+  if (tipo === 'omega')  return modalCheck('Ômega 3 tomado?', '1 cápsula após o almoço');
+  if (tipo === 'nevrix') return modalCheck('Nevrix IM aplicado?', '1 ampola IM profunda');
+  if (tipo === 'vitd')   return modalCheck('Sany D tomado?', '1 cápsula com refeição');
+  if (tipo === 'mou')    return modalCheck('Mounjaro aplicado?', '5.0mg subcutâneo');
+
+  if (tipo === 'treino') return modalTreino();
+  if (tipo === 'humor')  return modalHumor();
+  return '';
+}
+
+function modalRefeicao(ref, grupos) {
+  const pNev = nevrixDatas.find(d=>d>hoje&&!isSameDay(d,hoje));
+  const pMou = mouDatas.find(d=>d>hoje&&!isSameDay(d,hoje));
+  return `
+    <div class="m-sec">
+      <div class="m-lbl">Horário</div>
+      <div class="time-row"><span class="time-lbl">Que horas foi?</span><input type="time" class="time-inp" id="modal-hora"></div>
+    </div>
+    <div class="m-sec">
+      <div class="plano-toggle">
+        <button class="pt-btn ativo-ok" id="pt-ok" onclick="setPlanoModal('ok')">✅ Segui o plano</button>
+        <button class="pt-btn" id="pt-fora" onclick="setPlanoModal('fora')">⚠️ Saí do plano</button>
+      </div>
+      <div class="fora-bloco" id="modal-fora-bloco">
+        <div class="m-lbl" style="color:#c0500a;margin-bottom:6px">🍽️ O que você comeu de fato?</div>
+        <textarea class="fora-inp" id="modal-fora-txt" placeholder="Ex: comi uma pizza, tomei refrigerante..." rows="3"></textarea>
+      </div>
+      <div id="modal-chips-bloco">
+        ${grupos.map(g => `
+          <div class="m-lbl">${g.lbl}</div>
+          <div class="chips" style="margin-bottom:14px">
+            ${g.opts.map(o => `<span class="chip" data-grp="${g.grp}" data-multi="${g.multi}" onclick="${g.multi?'toggleChip':'pickChip'}(this,'${g.cls}')">${o}</span>`).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <button class="btn-confirmar" onclick="confirmarRefeicao('${ref}')">✅ Confirmar refeição</button>
+  `;
+}
+
+function modalCheck(label, sub) {
+  return `
+    <div class="m-sec">
+      <div class="chk-simple" id="chk-item" onclick="this.classList.toggle('on'); this.querySelector('.chk-box').textContent = this.classList.contains('on') ? '✓' : ''">
+        <div class="chk-box"></div>
+        <div>
+          <div class="chk-name">${label}</div>
+          <div class="chk-sub">${sub}</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-confirmar" onclick="confirmarCheck()">✅ Confirmar</button>
+  `;
+}
+
+// ── DEFINIÇÃO DOS TREINOS ─────────────────────────────────────────────────────
+const TREINOS = {
+  A: {
+    nome: 'Treino A — Peito',
+    exercs: [
+      { nome: 'Supino inclinado c/ halter', series: 'normal', dica: 'Cotovelo a 45°, desça controlado até sentir o alongamento do peito', video: 'https://www.youtube.com/results?search_query=supino+inclinado+halter+execução+correto' },
+      { nome: 'Supino declinado c/ halter', series: 'normal', dica: 'Banco a ~30° negativo, foco na parte inferior do peito', video: 'https://www.youtube.com/results?search_query=supino+declinado+halter+execução+correto' },
+      { nome: 'Supino neutro c/ halter/barra', series: 'normal', dica: 'Pegada neutra (palmas para dentro), protege o ombro', video: 'https://www.youtube.com/results?search_query=supino+neutro+halter+pegada+neutra+execução' },
+      { nome: 'Peck deck', series: 'normal', dica: 'Cotovelos levemente flexionados, não deixa passar demais para trás', video: 'https://www.youtube.com/results?search_query=peck+deck+voador+execução+correto' },
+      { nome: 'Flexão até a falha', series: 'falha', dica: '3x até a falha — pode apoiar os joelhos, sem vergonha', video: 'https://www.youtube.com/results?search_query=flexão+de+braço+execução+correta' },
+    ]
+  },
+  B: {
+    nome: 'Treino B — Pernas (Quadríceps)',
+    exercs: [
+      { nome: 'Agachamento completo no Smith', series: 'normal', dica: 'Desça até o final (abaixo de 90°), joelhos acompanham a ponta dos pés', video: 'https://www.youtube.com/results?search_query=agachamento+completo+smith+execução+correto' },
+      { nome: 'Afundo no lugar c/ halter', series: 'normal', dica: 'Tronco ereto, joelho da frente não ultrapassa o pé, desça até quase tocar o chão', video: 'https://www.youtube.com/results?search_query=afundo+no+lugar+halter+execução+correto' },
+      { nome: 'Leg press', series: 'normal', dica: 'Pés na largura dos ombros, desça até 90°, não trave o joelho no topo', video: 'https://www.youtube.com/results?search_query=leg+press+execução+correta+posição+pés' },
+      { nome: 'Cadeira extensora', series: 'normal', dica: 'Contração máxima no topo, desça devagar em 3 segundos', video: 'https://www.youtube.com/results?search_query=cadeira+extensora+execução+correta' },
+      { nome: 'Gêmeos sentado / no leg press', series: 'normal', dica: 'Amplitude total — calcanhar abaixo da plataforma, sobe até o máximo e segura 1 seg', video: 'https://www.youtube.com/results?search_query=panturrilha+gêmeos+sentado+execução+correta' },
+    ]
+  },
+  C: {
+    nome: 'Treino C — Costas + Bíceps',
+    exercs: [
+      { nome: 'Barra livre (pull-up)', series: 'falha3x', dica: '3x do que conseguir — pegada pronada, desce até braço estendido', video: 'https://www.youtube.com/results?search_query=barra+fixa+pull+up+execução+correta' },
+      { nome: 'Puxada frente pronada', series: 'normal', dica: 'Pegada bem aberta, puxa até o queixo, cotovelos puxam para baixo', video: 'https://www.youtube.com/results?search_query=puxada+frente+pronada+aberta+execução+correta' },
+      { nome: 'Serrote c/ halter', series: 'normal', dica: 'Cotovelo sobe alto e para trás, não rotaciona o tronco', video: 'https://www.youtube.com/results?search_query=remada+serrote+halter+execução+correta' },
+      { nome: 'Remada curvada c/ barra', series: 'normal', dica: 'Tronco a ~45°, puxa até o umbigo, escápulas se aproximam', video: 'https://www.youtube.com/results?search_query=remada+curvada+barra+execução+correta' },
+      { nome: 'Rosca direta (FST-7)', series: 'fst7', dica: 'FST-7: 7×10 com 30 seg descanso — cotovelo fixo, gira o punho na subida', video: 'https://www.youtube.com/results?search_query=rosca+direta+barra+execução+correta+bíceps' },
+    ]
+  },
+  D: {
+    nome: 'Treino D — Ombro + Tríceps',
+    exercs: [
+      { nome: 'Desenvolvimento sentado c/ halter', series: 'normal', dica: 'Sobe até quase travar, desce até cotovelo a 90°, não arqueia demais', video: 'https://www.youtube.com/results?search_query=desenvolvimento+sentado+halter+ombro+execução+correta' },
+      { nome: 'Elevação lateral c/ halter', series: 'normal', dica: 'Leve inclinação do tronco à frente, polegar ligeiramente para baixo (como derramar água)', video: 'https://www.youtube.com/results?search_query=elevação+lateral+halter+ombro+execução+correta' },
+      { nome: 'Elevação frontal c/ anilha', series: 'normal', dica: 'Sobe até a altura dos ombros, sem balanço, desce controlado', video: 'https://www.youtube.com/results?search_query=elevação+frontal+anilha+ombro+execução+correta' },
+      { nome: 'Crucifixo invertido c/ halter', series: 'normal', dica: 'Tronco paralelo ao chão, cotovelos levemente flexionados, foco no deltóide posterior', video: 'https://www.youtube.com/results?search_query=crucifixo+invertido+halter+deltóide+posterior+execução' },
+      { nome: 'Tríceps pulley reto (FST-7)', series: 'fst7', dica: 'FST-7: 7×10 com 30 seg descanso — cotovelo fixo ao lado do corpo, estende totalmente', video: 'https://www.youtube.com/results?search_query=tríceps+pulley+corda+reto+execução+correta' },
+    ]
+  },
+  E: {
+    nome: 'Treino E — Pernas (Posterior)',
+    exercs: [
+      { nome: 'Agachamento sumo', series: 'normal', dica: 'Pés bem abertos (>45°), pontas para fora, joelhos seguem as pontas dos pés', video: 'https://www.youtube.com/results?search_query=agachamento+sumo+execução+correta+glúteo' },
+      { nome: 'Elevação pélvica c/ barra', series: 'normal', dica: 'Barra no quadril com proteção, sobe até ficar paralelo ao chão, contrai o glúteo no topo 1 seg', video: 'https://www.youtube.com/results?search_query=elevação+pélvica+hip+thrust+barra+execução+correta' },
+      { nome: 'Búlgaro no Smith', series: 'normal', dica: 'Pé de trás elevado no banco, tronco ereto, desce controlado até coxa paralela', video: 'https://www.youtube.com/results?search_query=agachamento+búlgaro+smith+execução+correta' },
+      { nome: 'Cadeira / mesa flexora', series: 'normal', dica: 'Puxa calcanhar em direção ao glúteo, contrai no topo e desce devagar', video: 'https://www.youtube.com/results?search_query=cadeira+flexora+posterior+coxa+execução+correta' },
+      { nome: 'Gêmeos no Smith', series: 'normal', dica: 'Barra nos ombros, sobe na ponta do pé até o máximo, segura 1 seg, desce abaixo do nível', video: 'https://www.youtube.com/results?search_query=panturrilha+gêmeos+smith+execução+correta' },
+    ]
+  },
+};
+
+// Etapa do modal: 'escolha' | 'cargas'
+let treinoEtapa = 'escolha';
+let treinoSelecionado = null;
+
+function modalTreino() {
+  treinoEtapa = 'escolha';
+  treinoSelecionado = null;
+  return renderEscolhaTreino();
+}
+
+function renderEscolhaTreino() {
+  const cards = Object.entries(TREINOS).map(([id, t]) => `
+    <div class="treino-card" id="tc-${id}" onclick="escolherTreino('${id}')">
+      <div class="tc-header">
+        <span class="tc-badge">${id}</span>
+        <span class="tc-nome">${t.nome}</span>
+        <span class="tc-arr">›</span>
+      </div>
+      <div class="tc-exercs">${t.exercs.map(e=>`<span class="tc-ex">${e.nome}</span>`).join('')}</div>
+    </div>
+  `).join('');
+
+  return `
+    <style>
+      .treino-card{border:1.5px solid #e8e8e8;border-radius:14px;padding:13px 14px;margin-bottom:9px;cursor:pointer;background:#fafafa;transition:all .15s}
+      .treino-card:active{transform:scale(.98)}
+      .tc-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+      .tc-badge{background:#1b3a5c;color:white;font-size:13px;font-weight:900;border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+      .tc-nome{font-size:13px;font-weight:700;color:#1b3a5c;flex:1}
+      .tc-arr{color:#ccc;font-size:20px}
+      .tc-exercs{display:flex;flex-wrap:wrap;gap:5px}
+      .tc-ex{font-size:11px;background:#f0f0f0;border-radius:20px;padding:3px 9px;color:#555}
+      .descanso-btn{width:100%;border:1.5px dashed #ccc;border-radius:14px;padding:14px;background:#fafafa;color:#aaa;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;margin-bottom:16px}
+    </style>
+    <div style="background:#fff8e8;border:1.5px solid #f5d88a;border-radius:10px;padding:9px 12px;font-size:11px;color:#7a5500;margin-bottom:14px">
+      📋 <b>4 séries:</b> aquecimento → trabalho → trabalho → super série &nbsp;·&nbsp; ⏱ 1:30–2 min &nbsp;·&nbsp; 🔥 FST-7: 7×10 com 30 seg
+    </div>
+    ${cards}
+    <button class="descanso-btn" onclick="confirmarDescanso()">😴 Dia de descanso</button>
+  `;
+}
+
+function escolherTreino(id) {
+  treinoSelecionado = id;
+  treinoEtapa = 'cargas';
+  document.getElementById('modal-title').textContent = TREINOS[id].nome;
+  document.getElementById('modal-body').innerHTML = renderCargas(id);
+}
+
+function renderCargas(id) {
+  const t = TREINOS[id];
+  let html = `<style>
+    .ex-bloco{background:#f8f8f8;border:1.5px solid #eee;border-radius:14px;padding:14px;margin-bottom:12px}
+    .ex-nome{font-size:14px;font-weight:800;color:#1b3a5c;margin-bottom:3px}
+    .ex-dica{font-size:11px;color:#bbb;margin-bottom:12px;font-style:italic}
+    .serie-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .serie-badge{font-size:10px;font-weight:800;border-radius:6px;padding:3px 8px;white-space:nowrap;flex-shrink:0}
+    .sb-aq{background:#e8f0fe;color:#1b3a5c}
+    .sb-tr{background:#eaf7ef;color:#1a7a40}
+    .sb-ss{background:#1b3a5c;color:white}
+    .sb-ft{background:#ff6b35;color:white}
+    .serie-inp{flex:1;border:1.5px solid #e0e0e0;border-radius:9px;padding:8px 10px;font-size:13px;font-family:inherit;background:white;color:#1a1a1a}
+    .serie-inp:focus{outline:none;border-color:#1b3a5c}
+    .serie-inp::placeholder{color:#ccc;font-size:12px}
+    .ex-obs{width:100%;border:1.5px solid #e8e8e8;border-radius:9px;padding:8px 10px;font-size:13px;font-family:inherit;background:white;resize:none;min-height:44px;margin-top:4px}
+    .ex-obs:focus{outline:none;border-color:#1b3a5c}
+    .ex-obs::placeholder{color:#ccc;font-size:12px}
+    .voltar-btn{background:#f0f0f0;color:#555;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px}
+    .fst7-info{background:#fff3e0;border:1.5px solid #f5a623;border-radius:10px;padding:9px 12px;font-size:11px;color:#7a4200;margin-bottom:10px}
+    .ver-exec{display:inline-flex;align-items:center;gap:5px;background:#1b3a5c;color:white;border:none;border-radius:20px;padding:5px 13px;font-size:11px;font-weight:700;cursor:pointer;text-decoration:none;margin-bottom:10px}
+    .ver-exec:hover{background:#1b4f72}
+  </style>
+  <button class="voltar-btn" onclick="voltarEscolha()">← Trocar treino</button>`;
+
+  t.exercs.forEach((ex, idx) => {
+    const eid = `ex${id}${idx}`;
+    html += `<div class="ex-bloco">
+      <div class="ex-nome">${ex.nome}</div>
+      ${ex.video ? `<a class="ver-exec" href="${ex.video}" target="_blank" rel="noopener">▶ Ver execução</a>` : ''}
+      <div class="ex-dica">💡 ${ex.dica}</div>`;
+
+    if (ex.series === 'fst7') {
+      html += `<div class="fst7-info">🔥 <b>FST-7</b> — 7 séries de 10 reps com <b>30 segundos</b> de descanso entre cada</div>`;
+      for (let s = 1; s <= 7; s++) {
+        html += `<div class="serie-row">
+          <span class="serie-badge sb-ft">S${s}/7</span>
+          <input class="serie-inp" id="${eid}_s${s}" placeholder="kg · reps · obs">
+        </div>`;
+      }
+    } else if (ex.series === 'falha') {
+      html += `<div class="ex-dica" style="color:#c0500a;margin-top:-6px">3 séries até a falha</div>`;
+      for (let s = 1; s <= 3; s++) {
+        html += `<div class="serie-row">
+          <span class="serie-badge sb-tr">Falha ${s}</span>
+          <input class="serie-inp" id="${eid}_s${s}" placeholder="reps feitas · obs">
+        </div>`;
+      }
+    } else if (ex.series === 'falha3x') {
+      html += `<div class="ex-dica" style="color:#c0500a;margin-top:-6px">3x do que conseguir</div>`;
+      for (let s = 1; s <= 3; s++) {
+        html += `<div class="serie-row">
+          <span class="serie-badge sb-tr">S${s}</span>
+          <input class="serie-inp" id="${eid}_s${s}" placeholder="kg · reps feitas">
+        </div>`;
+      }
+    } else {
+      // normal: 1 aquecimento + 2 trabalho + 1 super série
+      const series = [
+        { badge: 'sb-aq', label: '🔥 Aquec.', hint: 'kg leve · ~20 reps' },
+        { badge: 'sb-tr', label: '💪 Trab. 1', hint: 'kg · até 8 reps' },
+        { badge: 'sb-tr', label: '💪 Trab. 2', hint: 'kg · até 8 reps' },
+        { badge: 'sb-ss', label: '⚡ Super S.', hint: 'kg máx · 4-5 reps' },
+      ];
+      series.forEach((s, si) => {
+        html += `<div class="serie-row">
+          <span class="serie-badge ${s.badge}">${s.label}</span>
+          <input class="serie-inp" id="${eid}_s${si+1}" placeholder="${s.hint}">
+        </div>`;
+      });
+    }
+
+    html += `<textarea class="ex-obs" id="${eid}_obs" placeholder="Anotação do exercício..." rows="1"></textarea>
+    </div>`;
+  });
+
+  html += `
+    <div class="m-sec">
+      <div class="m-lbl">Cardio hoje?</div>
+      <div class="chips" style="margin-bottom:12px">
+        <span class="chip" data-grp="cardio" onclick="pickChip(this,'sel-tren')">10 min</span>
+        <span class="chip" data-grp="cardio" onclick="pickChip(this,'sel-tren')">20 min</span>
+        <span class="chip" data-grp="cardio" onclick="pickChip(this,'sel-tren')">60 min</span>
+        <span class="chip" data-grp="cardio" onclick="pickChip(this,'sel-tren')">Não fiz</span>
+      </div>
+      <div class="m-lbl">Observação geral (opcional)</div>
+      <textarea class="obs-inp" id="treino-obs" placeholder="Como foi o treino, energia, dores..." rows="2"></textarea>
+    </div>
+    <button class="btn-confirmar" onclick="confirmarTreino()">✅ Confirmar treino</button>`;
+
+  return html;
+}
+
+function voltarEscolha() {
+  treinoEtapa = 'escolha';
+  treinoSelecionado = null;
+  document.getElementById('modal-title').textContent = '🏋️ Treino de hoje';
+  document.getElementById('modal-body').innerHTML = renderEscolhaTreino();
+}
+
+function confirmarDescanso() {
+  registros['__treino'] = 'Descanso 😴';
+  registros['__treino_cardio'] = '';
+  registros['__treino_obs'] = '';
+  registros['__treino_cargas'] = {};
+  marcarFeito('treino', 'Descanso 😴');
+  fecharModal();
+  toast('😴 Descanso registrado!');
+}
+
+function modalHumor() {
+  return `
+    <div class="m-sec">
+      <div class="m-lbl">Como foi o dia?</div>
+      <div class="hum-row">
+        <button class="hum-btn" onclick="selHumor(this,'😄 Ótimo')">😄<span class="hum-lbl">Ótimo</span></button>
+        <button class="hum-btn" onclick="selHumor(this,'🙂 Bom')">🙂<span class="hum-lbl">Bom</span></button>
+        <button class="hum-btn" onclick="selHumor(this,'😐 Ok')">😐<span class="hum-lbl">Ok</span></button>
+        <button class="hum-btn" onclick="selHumor(this,'😔 Cansado')">😔<span class="hum-lbl">Cansado</span></button>
+        <button class="hum-btn" onclick="selHumor(this,'😫 Péssimo')">😫<span class="hum-lbl">Péssimo</span></button>
+      </div>
+    </div>
+    <div class="m-sec">
+      <div class="m-lbl">Algo mais para registrar?</div>
+      <textarea class="obs-inp" id="humor-obs" placeholder="Observações livres do dia..." rows="2"></textarea>
+    </div>
+    <button class="btn-confirmar" onclick="confirmarHumor()">✅ Confirmar</button>
+  `;
+}
+
+// ── INTERAÇÕES DENTRO DO MODAL ────────────────────────────────────────────────
+function pickChip(el, cls) {
+  document.querySelectorAll(`#modal-body [data-grp="${el.dataset.grp}"]`).forEach(c=>c.className='chip');
+  el.classList.add(cls);
+}
+function toggleChip(el, cls) {
+  el.classList.contains(cls) ? el.className='chip' : el.classList.add(cls);
+}
+
+let planoModalState = 'ok';
+function setPlanoModal(estado) {
+  planoModalState = estado;
+  document.getElementById('pt-ok').className   = 'pt-btn' + (estado==='ok'   ? ' ativo-ok'   : '');
+  document.getElementById('pt-fora').className = 'pt-btn' + (estado==='fora' ? ' ativo-fora' : '');
+  const fb = document.getElementById('modal-fora-bloco');
+  const cb = document.getElementById('modal-chips-bloco');
+  if (estado === 'fora') { fb.classList.add('vis'); cb.style.display='none'; }
+  else                   { fb.classList.remove('vis'); cb.style.display='block'; }
+}
+
+function selHumor(btn, val) {
+  document.querySelectorAll('.hum-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  humorSel = val;
+}
+
+function getChips(grp) {
+  return [...document.querySelectorAll(`#modal-body [data-grp="${grp}"][class*="sel-"]`)].map(c=>c.textContent.trim()).join(' + ');
+}
+
+function confirmarRefeicao(ref) {
+  planoModalState = planoModalState || 'ok';
+  const hora = document.getElementById('modal-hora')?.value || '';
+  let resumo;
+
+  if (planoModalState === 'fora') {
+    const txt = document.getElementById('modal-fora-txt')?.value.trim() || '';
+    resumo = `⚠️ Fora do plano${txt ? ': ' + txt.substring(0,40) : ''}`;
+    registros['__' + ref + '_fora'] = txt;
+    registros['__' + ref + '_hora'] = hora;
+  } else {
+    const grpsMapa = { cafe:['c1p','c1c','c1f'], almoco:['c2p','c2c','c2e'], jantar:['c3t','c3p','c3c','c3e'] };
+    const itens = (grpsMapa[ref]||[]).map(g=>getChips(g)).filter(Boolean).join(' · ');
+    resumo = (hora ? hora + ' · ' : '') + (itens || 'Registrado no plano');
+    registros['__' + ref + '_itens'] = itens;
+    registros['__' + ref + '_hora'] = hora;
+  }
+  registros['__' + ref + '_modo'] = planoModalState;
+  planoModalState = 'ok';
+  marcarFeito(ref, resumo.substring(0,50) + (resumo.length>50?'…':''));
+  fecharModal();
+  toast('✅ ' + tituloModal(ref) + ' registrado!');
+}
+
+function confirmarCheck() {
+  const feito = document.getElementById('chk-item')?.classList.contains('on');
+  const id = modalAtual;
+  const resumo = feito ? '✅ Tomado' : '❌ Não tomado hoje';
+  registros['__' + id + '_feito'] = feito;
+  marcarFeito(id, resumo);
+  fecharModal();
+  toast('✅ ' + tituloModal(id) + ' registrado!');
+}
+
+function confirmarTreino() {
+  if (!treinoSelecionado) { toast('⚠️ Selecione um treino'); return; }
+
+  const id = treinoSelecionado;
+  const t  = TREINOS[id];
+  const cardio = getChips('cardio');
+  const obs    = document.getElementById('treino-obs')?.value.trim() || '';
+
+  // Coleta cargas de cada exercício
+  const cargas = {};
+  t.exercs.forEach((ex, idx) => {
+    const eid = `ex${id}${idx}`;
+    const numSeries = ex.series === 'fst7' ? 7 : (ex.series === 'falha' || ex.series === 'falha3x') ? 3 : 4;
+    const series = [];
+    for (let s = 1; s <= numSeries; s++) {
+      const val = document.getElementById(`${eid}_s${s}`)?.value.trim() || '';
+      if (val) series.push(val);
+    }
+    const exObs = document.getElementById(`${eid}_obs`)?.value.trim() || '';
+    cargas[ex.nome] = { series, obs: exObs };
+  });
+
+  registros['__treino']        = t.nome;
+  registros['__treino_id']     = id;
+  registros['__treino_cargas'] = cargas;
+  registros['__treino_cardio'] = cardio;
+  registros['__treino_obs']    = obs;
+  treinoSelecionado = null;
+
+  const resumo = t.nome + (cardio && cardio !== 'Não fiz' ? ` + 🏃 ${cardio}` : '');
+  marcarFeito('treino', resumo);
+  fecharModal();
+  toast('🏋️ Treino registrado!');
+}
+
+function confirmarHumor() {
+  const obs = document.getElementById('humor-obs')?.value.trim() || '';
+  const resumo = humorSel + (obs ? ' · ' + obs.substring(0,30) : '');
+  registros['__humor'] = humorSel;
+  registros['__humor_obs'] = obs;
+  marcarFeito('humor', resumo || 'Registrado');
+  fecharModal();
+  toast('😊 Humor registrado!');
+}
+
+// ── MENSAGEM WHATSAPP ─────────────────────────────────────────────────────────
+function buildMensagem() {
+  const d = hoje;
+  const titulo = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} — ${DIAS[d.getDay()]}`;
+  let msg = `💪 *BESTIE — Log do dia*\n📅 ${titulo}\n\n`;
+
+  // Refeições
+  for (const [ref, em, nome] of [['cafe','☀️','Café'],['almoco','🍽️','Almoço'],['jantar','🌙','Jantar']]) {
+    const modo = registros['__'+ref+'_modo'];
+    if (!modo) continue;
+    const hora = registros['__'+ref+'_hora'];
+    if (modo === 'fora') {
+      const txt = registros['__'+ref+'_fora'] || '';
+      msg += `${em} *${nome}${hora?' ('+hora+')':''} — ⚠️ Fora do plano*\n`;
+      if (txt) msg += `   📝 ${txt}\n`;
+    } else {
+      const itens = registros['__'+ref+'_itens'] || '';
+      msg += `${em} *${nome}${hora?' ('+hora+')':''}:* ${itens}\n`;
+    }
+  }
+
+  // Treino
+  const tr       = registros['__treino'];
+  const trObs    = registros['__treino_obs'];
+  const trCardio = registros['__treino_cardio'];
+  const trCargas = registros['__treino_cargas'];
+  if (tr) {
+    msg += `\n🏋️ *${tr}*`;
+    if (trCardio && trCardio !== 'Não fiz') msg += ` + 🏃 Cardio ${trCardio}`;
+    msg += '\n';
+    if (trCargas && typeof trCargas === 'object') {
+      Object.entries(trCargas).forEach(([exNome, dados]) => {
+        if (dados.series.length > 0 || dados.obs) {
+          msg += `\n*${exNome}*\n`;
+          dados.series.forEach((s, i) => { if (s) msg += `   S${i+1}: ${s}\n`; });
+          if (dados.obs) msg += `   📝 ${dados.obs}\n`;
+        }
+      });
+    }
+    if (trObs) msg += `\n📝 Geral: ${trObs}\n`;
+  }
+
+  // Remédios
+  msg += '\n💊 *Remédios:*\n';
+  const rem = [
+    ['vitc','🍊','Vitamina C'],
+    ['omega','🐟','Ômega 3'],
+  ];
+  if (ehNevrix) rem.push(['nevrix','💉','Nevrix IM']);
+  if (ehVitD)   rem.push(['vitd','☀️','Sany D']);
+  if (ehMou)    rem.push(['mou','💉','Mounjaro']);
+  for (const [id, em, nome] of rem) {
+    const feito = registros['__'+id+'_feito'];
+    if (feito === undefined) { msg += `⬜ ${nome} (não registrado)\n`; continue; }
+    msg += `${feito?'✅':'❌'} ${nome}\n`;
+  }
+
+  // Humor
+  const humor = registros['__humor'];
+  const humorObs = registros['__humor_obs'];
+  if (humor) msg += `\n${humor}`;
+  if (humorObs) msg += `\n📝 ${humorObs}`;
+
+  return msg;
+}
+
+function abrirWhatsApp() {
+  const msg = buildMensagem();
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 1. RASCUNHO LOCAL — salva e restaura o estado do dia no localStorage
+// ══════════════════════════════════════════════════════════════════
+const RASCUNHO_KEY = 'bestie_rascunho_' + hoje.toISOString().slice(0,10);
+
+function salvarRascunho() {
+  try {
+    const dados = {};
+    // itens marcados como done
+    document.querySelectorAll('#main-list .item.done').forEach(el => {
+      const id = el.id.replace('item-','');
+      dados['done_'+id] = el.querySelector('.item-sub')?.textContent || '';
+    });
+    // registros em memória
+    Object.assign(dados, registros);
+    localStorage.setItem(RASCUNHO_KEY, JSON.stringify(dados));
+  } catch(e) {}
+}
+
+function restaurarRascunho() {
+  try {
+    const raw = localStorage.getItem(RASCUNHO_KEY);
+    if (!raw) return;
+    const dados = JSON.parse(raw);
+    // restaura registros
+    Object.keys(dados).forEach(k => { if (!k.startsWith('done_')) registros[k] = dados[k]; });
+    // restaura itens done
+    Object.keys(dados).filter(k=>k.startsWith('done_')).forEach(k => {
+      const id = k.replace('done_','');
+      const sub = dados[k];
+      const el = document.getElementById('item-'+id);
+      if (el) {
+        el.classList.add('done');
+        el.querySelector('.item-sub').textContent = sub;
+        el.querySelector('.item-arrow').innerHTML = '<span class="done-badge">✅</span>';
+      }
+    });
+    atualizarProgresso();
+    if (Object.keys(dados).length > 0) toast('📂 Rascunho restaurado!');
+  } catch(e) {}
+}
+
+// Intercepta marcarFeito para salvar rascunho automaticamente
+const _marcarFeito = marcarFeito;
+window.marcarFeito = function(id, resumo) {
+  _marcarFeito(id, resumo);
+  salvarRascunho();
+};
+
+// ══════════════════════════════════════════════════════════════════
+// 2. HISTÓRICO DE CARGAS — salva e exibe cargas da última sessão
+// ══════════════════════════════════════════════════════════════════
+const HIST_KEY = 'bestie_cargas_hist';
+
+function salvarHistoricoCargas(treinoId, cargas) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '{}');
+    hist[treinoId] = { cargas, data: hoje.toISOString().slice(0,10) };
+    localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+  } catch(e) {}
+}
+
+function getHistoricoCargas(treinoId) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '{}');
+    return hist[treinoId] || null;
+  } catch(e) { return null; }
+}
+
+// Injeta histórico nos campos após renderizar cargas
+const _renderCargas = renderCargas;
+window.renderCargas = function(id) {
+  const html = _renderCargas(id);
+  // Retorna o HTML e agenda injeção dos valores históricos
+  setTimeout(() => injetarHistorico(id), 50);
+  return html;
+};
+
+function injetarHistorico(id) {
+  const hist = getHistoricoCargas(id);
+  if (!hist) return;
+  const t = TREINOS[id];
+  const diasAtras = Math.floor((new Date() - new Date(hist.data)) / 864e5);
+  const label = diasAtras === 0 ? 'hoje' : diasAtras === 1 ? 'ontem' : `${diasAtras}d atrás`;
+
+  t.exercs.forEach((ex, idx) => {
+    const eid = `ex${id}${idx}`;
+    const dadosHist = hist.cargas?.[ex.nome];
+    if (!dadosHist || !dadosHist.series?.length) return;
+
+    // Adiciona pill de histórico no nome do exercício
+    const nomeEl = document.getElementById(eid + '_nome');
+    if (nomeEl && !nomeEl.querySelector('.hist-pill')) {
+      nomeEl.insertAdjacentHTML('beforeend', `<span class="hist-pill">📊 ${label}</span>`);
+    }
+
+    // Coloca os valores históricos como placeholder nos inputs
+    dadosHist.series.forEach((val, si) => {
+      const inp = document.getElementById(`${eid}_s${si+1}`);
+      if (inp && val) inp.placeholder = `↩ ${val}`;
+    });
+    if (dadosHist.obs) {
+      const obs = document.getElementById(`${eid}_obs`);
+      if (obs) obs.placeholder = `↩ ${dadosHist.obs}`;
+    }
+  });
+}
+
+// Adiciona id ao ex-nome para injeção
+const _renderCargasOrig = renderCargas;
+// Patch no renderCargas para adicionar id nos nomes
+const origRenderCargas = window.renderCargas || renderCargas;
+
+// Salva histórico ao confirmar treino
+const _confirmarTreino = confirmarTreino;
+window.confirmarTreino = function() {
+  _confirmarTreino();
+  // Salva histórico se treino foi confirmado
+  if (registros['__treino_id'] && registros['__treino_cargas']) {
+    salvarHistoricoCargas(registros['__treino_id'], registros['__treino_cargas']);
+  }
+};
+
+// Patch renderCargas para incluir id nos ex-nome
+(function() {
+  const orig = renderCargas;
+  window.renderCargas = function(id) {
+    let html = orig(id);
+    // Adiciona id="exA0_nome" no ex-nome de cada exercício
+    const t = TREINOS[id];
+    t.exercs.forEach((ex, idx) => {
+      html = html.replace(
+        `<div class="ex-nome">${ex.nome}</div>`,
+        `<div class="ex-nome" id="ex${id}${idx}_nome">${ex.nome}</div>`
+      );
+    });
+    setTimeout(() => injetarHistorico(id), 60);
+    return html;
+  };
+})();
+
+// ══════════════════════════════════════════════════════════════════
+// 3. TIMER DE DESCANSO
+// ══════════════════════════════════════════════════════════════════
+let timerInterval = null;
+let timerTotal = 0;
+let timerRestante = 0;
+
+function iniciarTimer(segundos, label) {
+  if (timerInterval) clearInterval(timerInterval);
+  timerTotal = segundos;
+  timerRestante = segundos;
+  const overlay = document.getElementById('timer-overlay');
+  const numEl   = document.getElementById('timer-num');
+  const lblEl   = document.getElementById('timer-lbl');
+  const msgEl   = document.getElementById('timer-msg');
+  const arc     = document.getElementById('timer-arc');
+  const circum  = 2 * Math.PI * 90; // ~565
+
+  lblEl.textContent = label || 'Descanse';
+  msgEl.textContent = 'Próxima série em breve…';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  function atualizar() {
+    const mm = Math.floor(timerRestante / 60);
+    const ss = timerRestante % 60;
+    numEl.textContent = `${mm}:${String(ss).padStart(2,'0')}`;
+    const pct = timerRestante / timerTotal;
+    arc.style.strokeDashoffset = circum * (1 - pct);
+    arc.style.stroke = pct > 0.4 ? '#4dd88a' : pct > 0.15 ? '#f5a623' : '#e74c3c';
+  }
+
+  atualizar();
+  timerInterval = setInterval(() => {
+    timerRestante--;
+    atualizar();
+    if (timerRestante <= 0) {
+      clearInterval(timerInterval);
+      numEl.textContent = '0:00';
+      msgEl.textContent = '💪 Bora, próxima série!';
+      arc.style.stroke = '#4dd88a';
+      // vibrar se disponível
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      // som simples via AudioContext
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [440, 550, 660].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + i*0.15);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.15 + 0.3);
+          osc.start(ctx.currentTime + i*0.15);
+          osc.stop(ctx.currentTime + i*0.15 + 0.3);
+        });
+      } catch(e) {}
+      setTimeout(() => pularTimer(), 2500);
+    }
+  }, 1000);
+}
+
+function pularTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  document.getElementById('timer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Adiciona botão de timer em cada input de série
+function adicionarBotoesTimer() {
+  document.querySelectorAll('.serie-row').forEach(row => {
+    if (row.querySelector('.timer-btn')) return;
+    const isFst7 = row.querySelector('.sb-ft') !== null;
+    const seg = isFst7 ? 30 : 90;
+    const label = isFst7 ? 'FST-7 · 30 seg' : '1:30 de descanso';
+    const btn = document.createElement('button');
+    btn.className = 'timer-btn';
+    btn.textContent = '⏱';
+    btn.title = label;
+    btn.style.cssText = 'background:#f0f4ff;border:1.5px solid #c0d0f0;border-radius:8px;padding:7px 9px;font-size:14px;cursor:pointer;flex-shrink:0';
+    btn.onclick = (e) => { e.preventDefault(); iniciarTimer(seg, label); };
+    row.appendChild(btn);
+  });
+}
+
+// Observer para injetar botões de timer quando modal de treino abre
+const modalBodyObs = new MutationObserver(() => {
+  if (document.querySelector('.serie-row')) adicionarBotoesTimer();
+});
+modalBodyObs.observe(document.getElementById('modal-body'), { childList: true, subtree: true });
+
+// ── INIT ──────────────────────────────────────────────────────────
+atualizarProgresso();
+restaurarRascunho();
+</script>
+</body>
+</html>
