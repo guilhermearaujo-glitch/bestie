@@ -300,8 +300,8 @@ html, body { height: 100%; overflow-x: hidden; font-family: -apple-system, Blink
 
 <!-- ALERTAS -->
 <div class="alertas">
-  <div class="alerta alerta-mou" id="al-mou">💉 Hoje é dia do Mounjaro! Não esquece.</div>
-  <div class="alerta alerta-nev" id="al-nev">💉 Hoje é dia do Nevrix IM! Não esquece.</div>
+  <div class="alerta alerta-mou" id="al-mou">💉 Hoje é dia do Mounjaro 5.0mg! (Quinzenal — próxima em 15 dias) 📅</div>
+  <div class="alerta alerta-nev" id="al-nev">💉 Hoje é a <b>ÚLTIMA dose</b> do Nevrix IM! Ciclo completo após hoje 🎉</div>
   <div class="alerta alerta-vitd" id="al-vitd">☀️ Hoje é dia do Sany D! Toma com a refeição.</div>
 </div>
 
@@ -339,20 +339,20 @@ html, body { height: 100%; overflow-x: hidden; font-family: -apple-system, Blink
 
   <div class="section-lbl" id="sec-rem">💊 Remédios</div>
 
-  <div class="item" id="item-vitc" onclick="abrirModal('vitc')">
+  <div class="item" id="item-vitc" onclick="quickCheck('vitc', '🍊 Vitamina C', '✅ Tomada')">
     <div class="item-em">🍊</div>
     <div class="item-body">
       <div class="item-name">Vitamina C</div>
-      <div class="item-sub">1 efervescente</div>
+      <div class="item-sub">1 efervescente — toque para marcar</div>
     </div>
     <div class="item-arrow">›</div>
   </div>
 
-  <div class="item" id="item-omega" onclick="abrirModal('omega')">
+  <div class="item" id="item-omega" onclick="quickCheck('omega', '🐟 Ômega 3', '✅ Tomado após almoço')">
     <div class="item-em">🐟</div>
     <div class="item-body">
       <div class="item-name">Ômega 3</div>
-      <div class="item-sub">1 cápsula após o almoço</div>
+      <div class="item-sub">1 cápsula após almoço — toque para marcar</div>
     </div>
     <div class="item-arrow">›</div>
   </div>
@@ -473,7 +473,7 @@ function isSameDay(a,b) { return a.toISOString().slice(0,10)===b.toISOString().s
 function fmtDia(d) { return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; }
 function diffDias(d) { return Math.ceil((d-hoje)/864e5); }
 
-const nevrixDatas = Array.from({length:20},(_,i)=>{ const d=new Date('2026-05-20'); d.setDate(d.getDate()+i*7); return d; });
+const nevrixDatas = [new Date('2026-05-20')]; // última dose
 const vitdDatas   = ['2026-05-21','2026-05-28','2026-06-04','2026-06-11'].map(d=>new Date(d));
 const mouDatas    = ['2026-05-19','2026-06-02','2026-06-17','2026-07-01','2026-07-16'].map(d=>new Date(d));
 
@@ -1293,6 +1293,14 @@ const modalBodyObs = new MutationObserver(() => {
   if (document.querySelector('.serie-row')) adicionarBotoesTimer();
 });
 modalBodyObs.observe(document.getElementById('modal-body'), { childList: true, subtree: true });
+
+// ── QUICK CHECK (remédios simples — 1 toque) ──────────────────────
+function quickCheck(id, nome, resumo) {
+  registros['__' + id + '_feito'] = true;
+  marcarFeito(id, resumo);
+  toast('✅ ' + nome + ' registrado!');
+  if (navigator.vibrate) navigator.vibrate(60);
+}
 
 // ── INIT ──────────────────────────────────────────────────────────
 atualizarProgresso();
