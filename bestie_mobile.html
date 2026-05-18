@@ -40,15 +40,58 @@ html, body { height: 100%; overflow-x: hidden; font-family: -apple-system, Blink
 .prog-track { height: 5px; background: rgba(255,255,255,0.12); border-radius: 10px; }
 .prog-fill  { height: 100%; background: #4dd88a; border-radius: 10px; transition: width 0.4s ease; }
 
-/* ALERTAS */
-.alertas { padding: 0 14px 2px; margin-top: 10px; }
-.alerta {
-  padding: 10px 14px; font-size: 13px; font-weight: 600;
-  border-radius: 12px; margin-bottom: 6px; display: none;
+/* ALERTAS legados — ocultos, substituídos pelo card */
+.alertas { display: none; }
+.alerta  { display: none !important; }
+
+/* CARD AGENDA DO DIA */
+.agenda-card {
+  margin: 12px 14px 4px;
+  background: white;
+  border-radius: 18px;
+  border: 1.5px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  overflow: hidden;
 }
-.alerta-mou  { background: #fff4e0; color: #7a4800; }
-.alerta-nev  { background: #e8f0fe; color: #1b3a5c; }
-.alerta-vitd { background: #fffde6; color: #6b5900; }
+.agenda-hd {
+  background: linear-gradient(135deg, #1b3a5c, #1b4f72);
+  padding: 11px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.agenda-hd-title { color: white; font-size: 13px; font-weight: 800; letter-spacing: 0.3px; }
+.agenda-hd-badge {
+  background: rgba(255,255,255,0.18); color: white;
+  font-size: 10px; font-weight: 800; border-radius: 20px;
+  padding: 3px 9px; letter-spacing: 0.3px;
+}
+.agenda-body { padding: 10px 14px 12px; }
+.agenda-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f2f2f2;
+}
+.agenda-item:last-child { border-bottom: none; }
+.agenda-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-inj  { background: #e74c3c; }
+.dot-med  { background: #f39c12; }
+.dot-vit  { background: #27ae60; }
+.agenda-txt { flex: 1; }
+.agenda-nome { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+.agenda-sub  { font-size: 11px; color: #bbb; margin-top: 1px; }
+.agenda-ok {
+  font-size: 11px; font-weight: 800; color: #27ae60;
+  background: #eaf7ef; border-radius: 20px; padding: 3px 9px;
+  display: none;
+}
+.agenda-item.feito .agenda-ok { display: block; }
+.agenda-item.feito .agenda-nome { text-decoration: line-through; color: #aaa; }
+.agenda-vazio {
+  text-align: center; padding: 14px 0 4px;
+  font-size: 13px; color: #bbb; font-weight: 600;
+}
+.agenda-card.hidden { display: none; }
 
 /* LISTA PRINCIPAL */
 .main { padding: 12px 14px 100px; }
@@ -298,11 +341,22 @@ html, body { height: 100%; overflow-x: hidden; font-family: -apple-system, Blink
   <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
 </div>
 
-<!-- ALERTAS -->
+<!-- ALERTAS legados (mantidos para compatibilidade) -->
 <div class="alertas">
-  <div class="alerta alerta-mou" id="al-mou">💉 Hoje é dia do Mounjaro 5.0mg! (Quinzenal — próxima em 15 dias) 📅</div>
-  <div class="alerta alerta-nev" id="al-nev">💉 Hoje é a <b>ÚLTIMA dose</b> do Nevrix IM! Ciclo completo após hoje 🎉</div>
-  <div class="alerta alerta-vitd" id="al-vitd">☀️ Hoje é dia do Sany D! Toma com a refeição.</div>
+  <div class="alerta alerta-mou" id="al-mou"></div>
+  <div class="alerta alerta-nev" id="al-nev"></div>
+  <div class="alerta alerta-vitd" id="al-vitd"></div>
+</div>
+
+<!-- CARD AGENDA DO DIA -->
+<div class="agenda-card" id="agenda-card">
+  <div class="agenda-hd">
+    <span class="agenda-hd-title">📋 Agenda especial de hoje</span>
+    <span class="agenda-hd-badge" id="agenda-badge">0 itens</span>
+  </div>
+  <div class="agenda-body" id="agenda-body">
+    <div class="agenda-vazio">Nenhum item especial hoje 🎉</div>
+  </div>
 </div>
 
 <!-- LISTA PRINCIPAL -->
@@ -1294,6 +1348,62 @@ const modalBodyObs = new MutationObserver(() => {
 });
 modalBodyObs.observe(document.getElementById('modal-body'), { childList: true, subtree: true });
 
+// ── AGENDA DO DIA ────────────────────────────────────────────────────
+function montarAgenda() {
+  const itens = [];
+
+  if (ehMou)    itens.push({ id: 'mou',    dot: 'dot-inj', nome: '💉 Mounjaro 5.0mg', sub: 'Subcutâneo — quinzenal', linkedItem: 'mou' });
+  if (ehNevrix) itens.push({ id: 'nev',    dot: 'dot-inj', nome: '💉 Nevrix IM — ÚLTIMA dose!', sub: 'B12+B6+B1 · 1 ampola IM profunda · ciclo completo 🎉', linkedItem: 'nevrix' });
+  if (ehVitD)   itens.push({ id: 'vitd',   dot: 'dot-med', nome: '☀️ Sany D 50.000UI', sub: 'Tomar com refeição — 1x por semana', linkedItem: 'vitd' });
+
+  // Próximos lembretes (nos próximos 7 dias, não hoje)
+  const proxMou  = mouDatas.find(d => d > hoje && !isSameDay(d, hoje));
+  const proxNev  = nevrixDatas.find(d => d > hoje && !isSameDay(d, hoje));
+  const proxVitD = vitdDatas.find(d => d > hoje && !isSameDay(d, hoje));
+
+  const body  = document.getElementById('agenda-body');
+  const badge = document.getElementById('agenda-badge');
+
+  if (itens.length === 0) {
+    // Mostra próximos eventos como dica
+    const proximos = [];
+    if (proxMou)  proximos.push(`💉 Mounjaro em ${fmtDia(proxMou)} (${diffDias(proxMou)}d)`);
+    if (proxNev)  proximos.push(`💉 Nevrix em ${fmtDia(proxNev)} (${diffDias(proxNev)}d)`);
+    if (proxVitD) proximos.push(`☀️ Sany D em ${fmtDia(proxVitD)} (${diffDias(proxVitD)}d)`);
+
+    badge.textContent = 'Dia livre';
+    badge.style.background = 'rgba(77,216,138,0.25)';
+    body.innerHTML = `<div class="agenda-vazio">✅ Nenhum item especial hoje${proximos.length ? '<br><span style="font-size:11px;color:#ccc;margin-top:6px;display:block">' + proximos.join(' · ') + '</span>' : ''}</div>`;
+    return;
+  }
+
+  badge.textContent = itens.length === 1 ? '1 item' : `${itens.length} itens`;
+  body.innerHTML = itens.map(it => `
+    <div class="agenda-item" id="ag-${it.id}" onclick="agendaCheck('${it.id}','${it.linkedItem}')">
+      <div class="agenda-dot ${it.dot}"></div>
+      <div class="agenda-txt">
+        <div class="agenda-nome">${it.nome}</div>
+        <div class="agenda-sub">${it.sub}</div>
+      </div>
+      <div class="agenda-ok">✓ feito</div>
+    </div>
+  `).join('');
+}
+
+function agendaCheck(agId, itemId) {
+  // Marca no card
+  const agEl = document.getElementById('ag-' + agId);
+  if (agEl) agEl.classList.toggle('feito');
+  // Marca também na lista principal se o item estiver visível
+  const mainEl = document.getElementById('item-' + itemId);
+  if (mainEl && !mainEl.classList.contains('done')) {
+    registros['__' + itemId + '_feito'] = true;
+    marcarFeito(itemId, '✅ Feito');
+    toast('✅ Registrado!');
+    if (navigator.vibrate) navigator.vibrate(60);
+  }
+}
+
 // ── QUICK CHECK (remédios simples — 1 toque) ──────────────────────
 function quickCheck(id, nome, resumo) {
   registros['__' + id + '_feito'] = true;
@@ -1303,6 +1413,7 @@ function quickCheck(id, nome, resumo) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
+montarAgenda();
 atualizarProgresso();
 restaurarRascunho();
 </script>
